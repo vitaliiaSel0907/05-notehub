@@ -10,7 +10,7 @@ interface PaginationProps {
 
 const Pagination: React.FC<PaginationProps> = ({ currentPage, setCurrentPage, pageCount }) => {
   const handlePageClick = (event: { selected: number }) => {
-    setCurrentPage(event.selected + 1) // React Paginate нумерує з 0
+    setCurrentPage(event.selected + 1) 
   }
 
   return (
