@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchNotes } from '../../services/noteService'
 import type { Note } from '../../types/note'
+
 import css from './NoteList.module.css'
 
 interface NoteListProps {
