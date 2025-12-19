@@ -20,23 +20,27 @@ const NoteList: React.FC<NoteListProps> = ({
   const { data, isLoading, isError } = useQuery<Note[], Error>({
     queryKey: ['notes', searchTerm, currentPage],
     queryFn: () =>
-      fetchNotes({ page: currentPage, perPage, search: searchTerm }),
+      fetchNotes({
+        page: currentPage,
+        perPage,
+        search: searchTerm,
+      }),
   })
 
-  
+  //  ТИМЧАСОВО 
   useEffect(() => {
     if (data) {
-      setPageCount(Math.ceil(data.length / perPage)) 
+      setPageCount(Math.ceil(data.length / perPage))
     }
   }, [data, perPage, setPageCount])
 
   if (isLoading) return <p>Loading notes...</p>
-  if (isError) return <p>Error loading notes!</p>
+  if (isError) return <p>Error loading notes</p>
   if (!data || data.length === 0) return <p>No notes found</p>
 
   return (
     <ul className={css.list}>
-      {data.map((note: Note) => (
+      {data.map(note => (
         <li key={note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
@@ -51,3 +55,4 @@ const NoteList: React.FC<NoteListProps> = ({
 }
 
 export default NoteList
+
