@@ -23,9 +23,10 @@ const NoteList: React.FC<NoteListProps> = ({
       fetchNotes({ page: currentPage, perPage, search: searchTerm }),
   })
 
+  
   useEffect(() => {
-    if (data?.length) {
-      setPageCount(Math.ceil(data.length / perPage))
+    if (data) {
+      setPageCount(Math.ceil(data.length / perPage)) 
     }
   }, [data, perPage, setPageCount])
 
@@ -35,7 +36,7 @@ const NoteList: React.FC<NoteListProps> = ({
 
   return (
     <ul className={css.list}>
-      {data?.map((note: Note) => (
+      {data.map((note: Note) => (
         <li key={note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
