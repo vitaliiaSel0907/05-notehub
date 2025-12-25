@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchNotes } from '../../services/noteService'
-import type { Note } from '../../types/note'
-
+import type { NotesResponse } from '../../types/note'
 import css from './NoteList.module.css'
 
 interface NoteListProps {
@@ -18,7 +17,7 @@ const NoteList: React.FC<NoteListProps> = ({
 }) => {
   const perPage = 12
 
-  const { data, isLoading, isError } = useQuery<Note[], Error>({
+  const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
     queryKey: ['notes', searchTerm, currentPage],
     queryFn: () =>
       fetchNotes({
@@ -28,20 +27,19 @@ const NoteList: React.FC<NoteListProps> = ({
       }),
   })
 
-  //  ТИМЧАСОВО 
   useEffect(() => {
-    if (data) {
-      setPageCount(Math.ceil(data.length / perPage))
+    if (data?.notes) {
+      setPageCount(data.totalPages)
     }
-  }, [data, perPage, setPageCount])
+  }, [data, setPageCount])
 
   if (isLoading) return <p>Loading notes...</p>
   if (isError) return <p>Error loading notes</p>
-  if (!data || data.length === 0) return <p>No notes found</p>
+  if (!data?.notes || data.notes.length === 0) return <p>No notes found</p>
 
   return (
     <ul className={css.list}>
-      {data.map(note => (
+      {data.notes.map(note => (
         <li key={note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
@@ -56,4 +54,5 @@ const NoteList: React.FC<NoteListProps> = ({
 }
 
 export default NoteList
+
 

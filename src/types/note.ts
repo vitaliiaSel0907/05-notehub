@@ -5,4 +5,7 @@ export interface Note {
   tag: string
 }
 
-
+export interface NotesResponse {
+  notes: Note[]
+  totalPages: number
+}
