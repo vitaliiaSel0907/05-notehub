@@ -1,51 +1,43 @@
-import React, { useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { fetchNotes } from '../../services/noteService'
-import type { NotesResponse } from '../../types/note'
+import React from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { deleteNote } from '../../services/noteService'
+import type { Note } from '../../types/note'
 import css from './NoteList.module.css'
 
 interface NoteListProps {
-  searchTerm: string
-  currentPage: number
-  setPageCount: (count: number) => void
+  notes: Note[]
 }
 
-const NoteList: React.FC<NoteListProps> = ({
-  searchTerm,
-  currentPage,
-  setPageCount,
-}) => {
-  const perPage = 12
+const NoteList: React.FC<NoteListProps> = ({ notes }) => {
+  const queryClient = useQueryClient()
 
-  const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
-    queryKey: ['notes', searchTerm, currentPage],
-    queryFn: () =>
-      fetchNotes({
-        page: currentPage,
-        perPage,
-        search: searchTerm,
-      }),
+  const mutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+    },
   })
 
-  useEffect(() => {
-    if (data?.notes) {
-      setPageCount(data.totalPages)
-    }
-  }, [data, setPageCount])
+  const handleDelete = (id: string) => {
+    mutation.mutate(id)
+  }
 
-  if (isLoading) return <p>Loading notes...</p>
-  if (isError) return <p>Error loading notes</p>
-  if (!data?.notes || data.notes.length === 0) return <p>No notes found</p>
+  if (!notes || notes.length === 0) return <p>No notes found</p>
 
   return (
     <ul className={css.list}>
-      {data.notes.map(note => (
+      {notes.map(note => (
         <li key={note.id} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
             <span className={css.tag}>{note.tag}</span>
-            <button className={css.button}>Delete</button>
+            <button
+              className={css.button}
+              onClick={() => handleDelete(note.id)}
+            >
+              Delete
+            </button>
           </div>
         </li>
       ))}
@@ -54,5 +46,6 @@ const NoteList: React.FC<NoteListProps> = ({
 }
 
 export default NoteList
+
 
 

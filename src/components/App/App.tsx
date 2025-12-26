@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useDebounce } from 'use-debounce'
@@ -12,21 +11,23 @@ import Modal from '../Modal/Modal'
 import NoteForm from '../NoteForm/NoteForm'
 
 import { fetchNotes } from '../../services/noteService'
-import type { NotesResponse } from '../../types/note'
-
+import type { NotesResponse } from '../../types/notes-response'
 
 const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
-
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500)
 
  
-  // Запит до бекенду
- 
-const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
+  const handleSearchTermChange = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
+
+
+ const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
   queryKey: ['notes', currentPage, debouncedSearchTerm],
   queryFn: () =>
     fetchNotes({
@@ -36,26 +37,22 @@ const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
     }),
 })
 
-  // Логіка для loading/error
 
-  if (isLoading) {
-    return <p>Loading...</p>
-  }
 
-  if (isError) {
-    return <p>Error loading notes</p>
-  }
 
- 
+
+  if (isLoading) return <p>Loading...</p>
+  if (isError) return <p>Error loading notes</p>
+
   const pageCount = data?.totalPages ?? 1
 
   return (
     <div className={css.app}>
-   
       <header className={css.toolbar}>
-     
-        <SearchBox searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
+        <SearchBox
+          searchTerm={searchTerm}
+          setSearchTerm={handleSearchTermChange}
+        />
 
         {pageCount > 1 && (
           <Pagination
@@ -65,17 +62,14 @@ const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
           />
         )}
 
- 
         <button className={css.button} onClick={() => setIsModalOpen(true)}>
           Create note +
         </button>
       </header>
 
-    <NoteList
-  searchTerm={debouncedSearchTerm}
-  currentPage={currentPage}
-  setPageCount={() => {}} 
-/>
+    
+      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
+
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
@@ -87,5 +81,6 @@ const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
 }
 
 export default App
+
 
 

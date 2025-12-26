@@ -1,74 +1,106 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { Formik, Form, Field, ErrorMessage } from 'formik'
+import * as Yup from 'yup'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { createNote } from '../../services/noteService'
 import css from './NoteForm.module.css'
 
 interface NoteFormProps {
   onClose: () => void
 }
 
-const NoteForm: React.FC<NoteFormProps> = ({ onClose }) => {
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [tag, setTag] = useState('Todo')
+interface FormValues {
+  title: string
+  content: string
+  tag: string
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Тимчасово просто лог у консоль
-    console.log({ title, content, tag })
-    onClose()
+const validationSchema = Yup.object({
+  title: Yup.string().required('Title is required'),
+  content: Yup.string().required('Content is required'),
+  tag: Yup.string().required('Tag is required'),
+})
+
+const initialValues: FormValues = {
+  title: '',
+  content: '',
+  tag: 'Todo',
+}
+
+const NoteForm: React.FC<NoteFormProps> = ({ onClose }) => {
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] })
+      onClose()
+    },
+  })
+
+  const handleSubmit = (values: FormValues) => {
+    mutation.mutate(values)
   }
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
-      <div className={css.formGroup}>
-        <label htmlFor="title">Title</label>
-        <input
-          id="title"
-          type="text"
-          className={css.input}
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-        />
-      </div>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+    >
+      <Form className={css.form}>
+        <div className={css.formGroup}>
+          <label htmlFor="title">Title</label>
+          <Field id="title" name="title" className={css.input} />
+          <ErrorMessage name="title" component="div" className={css.error} />
+        </div>
 
-      <div className={css.formGroup}>
-        <label htmlFor="content">Content</label>
-        <textarea
-          id="content"
-          rows={8}
-          className={css.textarea}
-          value={content}
-          onChange={e => setContent(e.target.value)}
-        />
-      </div>
+        <div className={css.formGroup}>
+          <label htmlFor="content">Content</label>
+          <Field
+            as="textarea"
+            id="content"
+            name="content"
+            rows={8}
+            className={css.textarea}
+          />
+          <ErrorMessage name="content" component="div" className={css.error} />
+        </div>
 
-      <div className={css.formGroup}>
-        <label htmlFor="tag">Tag</label>
-        <select
-          id="tag"
-          className={css.select}
-          value={tag}
-          onChange={e => setTag(e.target.value)}
-        >
-          <option value="Todo">Todo</option>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
-          <option value="Meeting">Meeting</option>
-          <option value="Shopping">Shopping</option>
-        </select>
-      </div>
+        <div className={css.formGroup}>
+          <label htmlFor="tag">Tag</label>
+          <Field as="select" id="tag" name="tag" className={css.select}>
+            <option value="Todo">Todo</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Shopping">Shopping</option>
+          </Field>
+          <ErrorMessage name="tag" component="div" className={css.error} />
+        </div>
 
-      <div className={css.actions}>
-        <button type="button" className={css.cancelButton} onClick={onClose}>
-          Cancel
-        </button>
-        <button type="submit" className={css.submitButton}>
-          Create note
-        </button>
-      </div>
-    </form>
+        <div className={css.actions}>
+          <button
+            type="button"
+            className={css.cancelButton}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className={css.submitButton}
+            disabled={mutation.isPending}
+          >
+            Create note
+          </button>
+        </div>
+      </Form>
+    </Formik>
   )
 }
 
 export default NoteForm
+
 
 
