@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { NotesResponse } from '../types/notes-response'
+import type { NotesResponse } from '../types/NotesResponse'
 import type { Note } from '../types/note'
 
 
@@ -19,7 +19,6 @@ interface CreateNotePayload {
   tag: string
 }
 
-// API functions
 
 export const fetchNotes = async ({
   page,
@@ -52,10 +51,13 @@ export const createNote = async (
   return response.data
 }
 
-export const deleteNote = async (id: string): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`, {
+export const deleteNote = async (id: string): Promise<Note> => {
+  const response = await axios.delete<Note>(`${API_URL}/${id}`, {
     headers: {
       Authorization: `Bearer ${TOKEN}`,
     },
   })
+
+  return response.data
 }
+

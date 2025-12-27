@@ -11,7 +11,7 @@ import Modal from '../Modal/Modal'
 import NoteForm from '../NoteForm/NoteForm'
 
 import { fetchNotes } from '../../services/noteService'
-import type { NotesResponse } from '../../types/notes-response'
+import type { NotesResponse } from '../../types/NotesResponse'
 
 const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -20,31 +20,27 @@ const App: React.FC = () => {
 
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500)
 
- 
-  const handleSearchTermChange = (value: string) => {
+  const handleSearchTermChange = (value: string, ..._args: any[]) => {
     setSearchTerm(value)
     setCurrentPage(1)
   }
 
+  const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
+    queryKey: ['notes', currentPage, debouncedSearchTerm],
+    queryFn: () =>
+      fetchNotes({
+        page: currentPage,
+        perPage: 12,
+        search: debouncedSearchTerm,
+      }),
+    //  Placeholder data для уникнення мерехтіння UI ( keepPreviousData не йде або не підтримується -помилки)
+    placeholderData: { notes: [], totalPages: 1 },
+  })
 
- const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
-  queryKey: ['notes', currentPage, debouncedSearchTerm],
-  queryFn: () =>
-    fetchNotes({
-      page: currentPage,
-      perPage: 12,
-      search: debouncedSearchTerm,
-    }),
-})
-
-
-
-
+  const pageCount = data?.totalPages ?? 1
 
   if (isLoading) return <p>Loading...</p>
   if (isError) return <p>Error loading notes</p>
-
-  const pageCount = data?.totalPages ?? 1
 
   return (
     <div className={css.app}>
@@ -67,9 +63,11 @@ const App: React.FC = () => {
         </button>
       </header>
 
-    
-      {data?.notes && data.notes.length > 0 && <NoteList notes={data.notes} />}
-
+      {data?.notes.length ? (
+        <NoteList notes={data.notes} />
+      ) : (
+        <p>No notes found.</p>
+      )}
 
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
@@ -81,6 +79,3 @@ const App: React.FC = () => {
 }
 
 export default App
-
-
-

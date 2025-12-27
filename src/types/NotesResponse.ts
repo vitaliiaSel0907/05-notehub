@@ -1,4 +1,4 @@
-import type { Note } from '../types/note'  
+import type { Note } from './note'  
 
 export interface NotesResponse {
   notes: Note[]
