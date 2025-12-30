@@ -20,10 +20,11 @@ const App: React.FC = () => {
 
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500)
 
-  const handleSearchTermChange = (value: string, ..._args: any[]) => {
-    setSearchTerm(value)
-    setCurrentPage(1)
-  }
+ const handleSearchTermChange = (value: string) => {
+  setSearchTerm(value)
+  setCurrentPage(1)
+}
+
 
   const { data, isLoading, isError } = useQuery<NotesResponse, Error>({
     queryKey: ['notes', currentPage, debouncedSearchTerm],
@@ -33,7 +34,8 @@ const App: React.FC = () => {
         perPage: 12,
         search: debouncedSearchTerm,
       }),
-    //  Placeholder data для уникнення мерехтіння UI ( keepPreviousData не йде або не підтримується -помилки)
+    //  Placeholder data для уникнення мерехтіння UI
+    //  ( keepPreviousData не йде або не підтримується -помилки. може через версію)
     placeholderData: { notes: [], totalPages: 1 },
   })
 

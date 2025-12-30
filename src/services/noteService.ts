@@ -2,23 +2,20 @@ import axios from 'axios'
 import type { NotesResponse } from '../types/NotesResponse'
 import type { Note } from '../types/note'
 
-
 const API_URL = 'https://notehub-public.goit.study/api/notes'
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN
 
-
 interface FetchNotesParams {
   page: number
-  perPage: number
+  perPage?: number
   search?: string
 }
 
 interface CreateNotePayload {
   title: string
-  content: string
+  content: string | null
   tag: string
 }
-
 
 export const fetchNotes = async ({
   page,
@@ -60,4 +57,3 @@ export const deleteNote = async (id: string): Promise<Note> => {
 
   return response.data
 }
-
